@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>أستغفر الله</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:#071d16;font-family:Tahoma,Arial,sans-serif}body{display:flex;justify-content:center;align-items:flex-start;overflow-x:hidden}.app{position:relative;width:min(100vw,852px);min-height:100vh;background:#071d16}.screen{position:relative;width:100%;aspect-ratio:852/1846;overflow:hidden;background:#0a2b20}.screen>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}.hotspot{position:absolute;border:0;background:transparent;padding:0;margin:0;cursor:pointer;z-index:5;border-radius:50%;-webkit-tap-highlight-color:transparent}.hotspot:focus-visible{outline:2px solid rgba(255,215,100,.9);outline-offset:3px}.status{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:20;background:rgba(5,48,35,.92);color:#fff;padding:10px 16px;border-radius:14px;font-size:13px;box-shadow:0 8px 28px #0006;opacity:0;pointer-events:none;transition:.2s}.status.show{opacity:1}.modal{position:fixed;inset:0;z-index:30;background:#0008;display:none;align-items:center;justify-content:center;padding:20px}.modal.show{display:flex}.panel{width:min(420px,92vw);background:#f8fbf9;border-radius:22px;padding:20px;box-shadow:0 20px 70px #0008;color:#17382d}.panel h2{margin:0 0 12px}.panel button{border:0;border-radius:12px;padding:10px 15px;background:#0f513f;color:#fff;font-weight:700}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#e9f3ee;border-radius:14px;padding:12px}.stat b{display:block;font-size:20px;margin-top:3px}
+</style>
+</head>
+<body>
+<main class="app">
+ <div class="screen" id="screen">
+  <img src="واجهة-الاستغفار.jpg" alt="واجهة أستغفر الله">
+  <!-- مناطق لمس شفافة فوق الأزرار الموجودة في الصورة الأصلية -->
+  <button class="hotspot" id="settings" aria-label="الإعدادات"></button>
+  <button class="hotspot" id="statsBtn" aria-label="الإحصائيات"></button>
+  <button class="hotspot" id="reset" aria-label="تصفير"></button>
+  <button class="hotspot" id="count" aria-label="أستغفر الله"></button>
+  <button class="hotspot" id="goals" aria-label="الأهداف"></button>
+  <button class="hotspot" id="azkar" aria-label="الأذكار"></button>
+  <button class="hotspot" id="record" aria-label="السجل"></button>
+  <button class="hotspot" id="home" aria-label="الرئيسية"></button>
+  <button class="hotspot" id="favorites" aria-label="المفضلة"></button>
+  <button class="hotspot" id="more" aria-label="المزيد"></button>
+ </div>
+</main>
+<div class="status" id="status"></div>
+<div class="modal" id="modal"><div class="panel"><h2 id="modalTitle"></h2><div id="modalBody"></div><div style="margin-top:14px;text-align:left"><button onclick="closeModal()">إغلاق</button></div></div></div>
+<script>
+const $=id=>document.getElementById(id);
+const state=JSON.parse(localStorage.getItem('istighfar_state')||'{"count":0,"goal":100,"history":[]}');
+function save(){localStorage.setItem('istighfar_state',JSON.stringify(state))}
+function toast(t){const e=$('status');e.textContent=t;e.classList.add('show');clearTimeout(window._toast);window._toast=setTimeout(()=>e.classList.remove('show'),1600)}
+function modal(title,body){$('modalTitle').textContent=title;$('modalBody').innerHTML=body;$('modal').classList.add('show')}
+function closeModal(){$('modal').classList.remove('show')}
+function showStats(){modal('الإحصائيات',`<div class="stats"><div class="stat">العدد الحالي<b>${state.count}</b></div><div class="stat">الهدف<b>${state.goal}</b></div><div class="stat">نسبة الإنجاز<b>${Math.min(100,Math.round(state.count/state.goal*100))}%</b></div><div class="stat">جلسات السجل<b>${state.history.length}</b></div></div>`)}
+function count(){state.count++;if(state.count%state.goal===0)toast('ما شاء الله، اكتمل الهدف');save()}
+function reset(){if(confirm('هل تريد تصفير العداد؟')){state.history.push({count:state.count,time:new Date().toISOString()});state.count=0;save();toast('تم تصفير العداد')}}
+function goals(){modal('الأهداف',`اختر الهدف: <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">${[100,500,1000].map(n=>`<button onclick="setGoal(${n});closeModal()">${n}</button>`).join('')}</div>`)}
+function setGoal(n){state.goal=n;save();toast('تم اختيار هدف '+n)}
+function record(){modal('السجل',state.history.length?state.history.slice().reverse().map((x,i)=>`<div class="stat" style="margin-bottom:7px">جلسة ${i+1}: ${x.count} استغفار<br><small>${new Date(x.time).toLocaleString('ar-IQ')}</small></div>`).join(''):'لا يوجد سجل بعد.')}
+function more(){modal('المزيد','خيارات التطبيق متاحة من هذه القائمة.')}
+function setHotspots(){
+ const p={settings:[4,5,9,4.5],statsBtn:[88,5,9,4.5],reset:[22,49,14,7],count:[50,49,27,12],goals:[78,49,14,7],azkar:[12,91,13,7],record:[32,91,13,7],home:[50,91,15,8],favorites:[69,91,13,7],more:[88,91,13,7]};
+ for(const [id,[l,t,w,h]] of Object.entries(p)){const e=$(id);e.style.left=l-w/2+'%';e.style.top=t-h/2+'%';e.style.width=w+'%';e.style.height=h+'%'}
+}
+$('count').onclick=count;$('reset').onclick=reset;$('goals').onclick=goals;$('statsBtn').onclick=showStats;$('record').onclick=record;$('more').onclick=more;$('settings').onclick=()=>toast('الإعدادات');$('azkar').onclick=()=>toast('الأذكار');$('home').onclick=()=>toast('الرئيسية');$('favorites').onclick=()=>toast('المفضلة');$('modal').onclick=e=>{if(e.target===$('modal'))closeModal()};setHotspots();
+</script>
+</body></html>
